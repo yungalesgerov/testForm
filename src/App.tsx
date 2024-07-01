@@ -1,13 +1,17 @@
-import React from "react";
-import logo from "./logo.svg";
+import React, { FC } from "react";
 import "./App.css";
+import TestForm from "./components/testing/TestForm";
+import { DataProvider } from "./context/dataContext";
 
-function App() {
+const App: FC = () => {
   return (
-    <div className="App">
-      <h1>Hello World</h1>
-    </div>
+    <DataProvider>
+      <div className="App">
+        <h1>Hello World</h1>
+        <TestForm />
+      </div>
+    </DataProvider>
   );
-}
+};
 
 export default App;
