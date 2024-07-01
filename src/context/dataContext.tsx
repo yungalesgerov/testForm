@@ -21,7 +21,10 @@ interface DataContextType {
   showQuiz: boolean;
   question: Question;
   quizs: Question[];
-  checkAnswer: (event: MouseEvent<HTMLButtonElement>, selected: string) => void;
+  checkAnswer: (
+    event: MouseEvent<HTMLButtonElement>,
+    selected: string[]
+  ) => void;
   correctAnswer: string;
   selectedAnswer: string;
   questionIndex: number;
@@ -52,10 +55,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const [showResult, setShowResult] = useState(false);
 
   useEffect(() => {
-    fetch("https://jsonplaceholder.typicode.com/todos/1")
+    fetch("quiz.json")
       .then((res) => res.json())
       .then((data) => {
-        console.log("1", data);
         setQuizs(data);
         setQuestion(data[0]);
         // Устанавливаем первый вопрос при загрузке данных
@@ -74,29 +76,41 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   };
 
   const checkAnswer = (
-    event: MouseEvent<HTMLButtonElement>,
-    selected: string
+    event: React.MouseEvent<HTMLButtonElement>,
+    selectedOptions: string[]
   ) => {
-    if (!selectedAnswer) {
-      setCorrectAnswer(question.answer);
-      setSelectedAnswer(selected);
+    const correctAnswers = question.answer
+      .split(", ")
+      .map((answer) => answer.trim());
 
-      if (selected === question.answer) {
-        event.currentTarget.classList.add("bg-success");
+    if (correctAnswers.length === 1) {
+      // If there's only one correct answer
+      if (
+        selectedOptions.length === 1 &&
+        selectedOptions[0] === correctAnswers[0]
+      ) {
         setMarks(marks + 5);
-      } else {
-        event.currentTarget.classList.add("bg-danger");
+      }
+    } else {
+      // If there are multiple correct answers
+      const selectedCorrectAnswers = selectedOptions.filter((option) =>
+        correctAnswers.includes(option)
+      );
+      if (
+        selectedCorrectAnswers.length === correctAnswers.length &&
+        selectedCorrectAnswers.length === selectedOptions.length
+      ) {
+        setMarks(marks + 5);
       }
     }
+
+    setCorrectAnswer(question.answer);
+    setSelectedAnswer(selectedOptions.join(", "));
   };
 
   const nextQuestion = () => {
     setCorrectAnswer("");
     setSelectedAnswer("");
-    const wrongBtn = document.querySelector("button.bg-danger");
-    wrongBtn?.classList.remove("bg-danger");
-    const rightBtn = document.querySelector("button.bg-success");
-    rightBtn?.classList.remove("bg-success");
     setQuestionIndex(questionIndex + 1);
   };
 
@@ -114,10 +128,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     setSelectedAnswer("");
     setQuestionIndex(0);
     setMarks(0);
-    const wrongBtn = document.querySelector("button.bg-danger");
-    wrongBtn?.classList.remove("bg-danger");
-    const rightBtn = document.querySelector("button.bg-success");
-    rightBtn?.classList.remove("bg-success");
   };
 
   if (quizs.length === 0) {
