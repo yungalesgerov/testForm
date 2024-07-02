@@ -6,7 +6,6 @@ import React, {
   MouseEvent,
 } from "react";
 
-// Интерфейс для вопроса
 interface Question {
   id: number;
   question: string;
@@ -14,8 +13,7 @@ interface Question {
   answer: string;
 }
 
-// Интерфейс для контекста
-interface DataContextType {
+export interface DataContextType {
   startQuiz: () => void;
   showStart: boolean;
   showQuiz: boolean;
@@ -33,9 +31,9 @@ interface DataContextType {
   showResult: boolean;
   marks: number;
   startOver: () => void;
+  setShowResult: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-// Создание контекста с начальным значением
 const DataContext = createContext<Partial<DataContextType>>({});
 
 interface DataProviderProps {
@@ -55,53 +53,66 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const [showResult, setShowResult] = useState(false);
 
   useEffect(() => {
-    fetch("quiz.json")
-      .then((res) => res.json())
-      .then((data) => {
-        setQuizs(data);
-        setQuestion(data[0]);
-        // Устанавливаем первый вопрос при загрузке данных
-      });
+    const savedState = localStorage.getItem("quizState");
+    if (savedState) {
+      const state = JSON.parse(savedState);
+      setQuizs(state.quizs);
+      setQuestionIndex(state.questionIndex);
+      setCorrectAnswer(state.correctAnswer);
+      setSelectedAnswer(state.selectedAnswer);
+      setMarks(state.marks);
+      setShowStart(state.showStart);
+      setShowQuiz(state.showQuiz);
+      setShowResult(state.showResult);
+    } else {
+      fetch("quiz.json")
+        .then((res) => res.json())
+        .then((data) => setQuizs(data));
+    }
   }, []);
 
   useEffect(() => {
     if (quizs.length > 0) {
       setQuestion(quizs[questionIndex]);
+      const state = {
+        quizs,
+        questionIndex,
+        correctAnswer,
+        selectedAnswer,
+        marks,
+        showStart,
+        showQuiz,
+        showResult,
+      };
+      localStorage.setItem("quizState", JSON.stringify(state));
     }
-  }, [quizs, questionIndex]);
+  }, [
+    quizs,
+    questionIndex,
+    correctAnswer,
+    selectedAnswer,
+    marks,
+    showStart,
+    showQuiz,
+    showResult,
+  ]);
 
   const startQuiz = () => {
     setShowStart(false);
     setShowQuiz(true);
   };
-
   const checkAnswer = (
-    event: React.MouseEvent<HTMLButtonElement>,
+    event: MouseEvent<HTMLButtonElement>,
     selectedOptions: string[]
   ) => {
-    const correctAnswers = question.answer
-      .split(", ")
-      .map((answer) => answer.trim());
+    const correctAnswers = question.answer.split(", ");
+    const isCorrect =
+      correctAnswers.length === 1
+        ? selectedOptions[0] === correctAnswers[0]
+        : selectedOptions.every((option) => correctAnswers.includes(option));
 
-    if (correctAnswers.length === 1) {
-      // If there's only one correct answer
-      if (
-        selectedOptions.length === 1 &&
-        selectedOptions[0] === correctAnswers[0]
-      ) {
-        setMarks(marks + 5);
-      }
-    } else {
-      // If there are multiple correct answers
-      const selectedCorrectAnswers = selectedOptions.filter((option) =>
-        correctAnswers.includes(option)
-      );
-      if (
-        selectedCorrectAnswers.length === correctAnswers.length &&
-        selectedCorrectAnswers.length === selectedOptions.length
-      ) {
-        setMarks(marks + 5);
-      }
+    if (isCorrect) {
+      setMarks((prevMarks) => prevMarks + 5);
     }
 
     setCorrectAnswer(question.answer);
@@ -111,7 +122,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const nextQuestion = () => {
     setCorrectAnswer("");
     setSelectedAnswer("");
-    setQuestionIndex(questionIndex + 1);
+    setQuestionIndex((prevIndex) => prevIndex + 1);
   };
 
   const showTheResult = () => {
@@ -130,10 +141,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     setMarks(0);
   };
 
-  if (quizs.length === 0) {
-    return null; // Если данные еще не загружены, ничего не отрисовываем
-  }
-
   return (
     <DataContext.Provider
       value={{
@@ -151,6 +158,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         showResult,
         marks,
         startOver,
+        setShowResult,
       }}
     >
       {children}

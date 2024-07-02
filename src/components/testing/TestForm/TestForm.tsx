@@ -6,11 +6,16 @@ import TestElement from "../TestElement/TestElement";
 import { Checkbox, FormControlLabel, Radio, RadioGroup } from "@mui/material";
 import ResultForm from "./ResultForm/ResultForm";
 import StartForm from "./StartForm/StartForm";
+
 const TestFormRoot = styled("div")({
   width: "80%",
   margin: "0 auto",
   height: "40vh",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "space-between",
   border: "1px solid black",
+  padding: "20px",
 });
 
 const TimerRoot = styled("div")({
@@ -19,16 +24,33 @@ const TimerRoot = styled("div")({
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  border: "1px solid red",
+  border: "1px solid grey",
 });
 
 const DivBorder = styled("div")({
   width: "100%",
-  minHeight: "100px",
-  border: "1px solid grey",
+  minHeight: "60px",
   display: "flex",
-  justifyContent: "space-between",
+  gap: "20px",
 });
+
+const TestElementContainer = styled("div")({
+  width: "100%",
+  height: "20px",
+  display: "flex",
+  gap: "6px",
+});
+
+const Button = styled("button")(({ disabled }) => ({
+  width: "100px",
+  height: "40px",
+  backgroundColor: disabled ? "#ded6d5" : "#f0230a",
+  borderRadius: "4px",
+  border: "none",
+  color: "white",
+  textAlign: "center",
+  cursor: "pointer",
+}));
 
 const TestForm: FC = () => {
   const {
@@ -37,22 +59,17 @@ const TestForm: FC = () => {
     question,
     quizs,
     checkAnswer,
-    correctAnswer,
-    selectedAnswer,
     questionIndex,
     nextQuestion,
     showTheResult,
   } = useContext(DataContext);
 
   const [selectedOption, setSelectedOption] = useState<string[]>([]);
+  const [resetTimer, setResetTimer] = useState(false);
 
   useEffect(() => {
     setSelectedOption([]);
   }, [question]);
-
-  if (!question || !quizs || questionIndex === undefined) {
-    return null; // Лучше вернуть null или заглушку, если данные еще не загрузились
-  }
 
   const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -63,29 +80,34 @@ const TestForm: FC = () => {
     );
   };
 
-  const handleNextQuestion = () => {
+  const handleAnswerAction = (action: () => void) => {
+    const event = { currentTarget: document.createElement("button") } as any;
     if (checkAnswer) {
-      checkAnswer(
-        { currentTarget: document.createElement("button") } as any,
-        selectedOption
-      );
+      checkAnswer(event, selectedOption);
     }
-    if (nextQuestion) {
-      nextQuestion();
-    }
+    action();
+  };
+
+  const handleNextQuestion = () => {
+    handleAnswerAction(() => {
+      if (nextQuestion) {
+        nextQuestion();
+      }
+    });
   };
 
   const handleShowResult = () => {
-    if (checkAnswer) {
-      checkAnswer(
-        { currentTarget: document.createElement("button") } as any,
-        selectedOption
-      );
-    }
-    if (showTheResult) {
-      showTheResult();
-    }
+    handleAnswerAction(() => {
+      if (showTheResult) {
+        showTheResult();
+      }
+      setResetTimer(true);
+    });
   };
+
+  if (!question || !quizs || questionIndex === undefined) {
+    return null;
+  }
 
   return (
     <TestFormRoot>
@@ -93,28 +115,29 @@ const TestForm: FC = () => {
       {showResult && <ResultForm />}
       {!showStart && !showResult && (
         <>
-          <DivBorder style={{ display: "flex" }}>
-            <div>
-              <h1>Тестирование</h1>
-            </div>
+          <DivBorder>
+            <h1>Тестирование</h1>
             <TimerRoot>
-              <Timer initialMinutes={20} />
+              <Timer
+                initialMinutes={0.2}
+                resetTimer={resetTimer}
+                setResetTimer={setResetTimer}
+              />
             </TimerRoot>
           </DivBorder>
-          <DivBorder>
-            {quizs &&
-              quizs.map((item, index) => (
-                <TestElement
-                  key={index}
-                  isActive={questionIndex === index}
-                  checked={questionIndex > index}
-                />
-              ))}
-          </DivBorder>
+          <TestElementContainer>
+            {quizs.map((item, index) => (
+              <TestElement
+                key={index}
+                isActive={questionIndex === index}
+                checked={questionIndex > index}
+              />
+            ))}
+          </TestElementContainer>
           <DivBorder style={{ flexDirection: "column" }}>
-            <h1>{question?.question}</h1>
+            <h2>{question.question}</h2>
             <RadioGroup value={selectedOption} onChange={handleOptionChange}>
-              {question?.options?.map((item, index) => (
+              {question.options.map((item, index) => (
                 <FormControlLabel
                   key={index}
                   value={item}
@@ -130,15 +153,16 @@ const TestForm: FC = () => {
             </RadioGroup>
           </DivBorder>
           <DivBorder>
-            {questionIndex + 1 !== quizs.length ? (
-              <button onClick={handleNextQuestion} disabled={!selectedOption}>
-                Next Question
-              </button>
-            ) : (
-              <button onClick={handleShowResult} disabled={!selectedOption}>
-                Show Result
-              </button>
-            )}
+            <Button
+              onClick={
+                questionIndex + 1 !== quizs.length
+                  ? handleNextQuestion
+                  : handleShowResult
+              }
+              disabled={!selectedOption.length}
+            >
+              {questionIndex + 1 !== quizs.length ? "Ответить" : "Show Result"}
+            </Button>
           </DivBorder>
         </>
       )}
