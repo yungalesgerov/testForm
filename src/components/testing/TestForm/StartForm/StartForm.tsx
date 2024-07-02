@@ -1,6 +1,8 @@
 import React, { useContext, FC } from "react";
 import DataContext from "../../../../context/dataContext";
 import styled from "@emotion/styled";
+import { Typography } from "@mui/material";
+
 const StartFormRoot = styled("div")({
   width: "80%",
   margin: "0 auto",
@@ -22,7 +24,7 @@ const StartForm: FC = () => {
   const { startQuiz } = useContext(DataContext);
   return (
     <StartFormRoot>
-      <h1>Начать тестирование</h1>
+      <Typography variant="h4">Начать тестирование</Typography>
       <Button onClick={startQuiz}>Start Quiz</Button>
     </StartFormRoot>
   );

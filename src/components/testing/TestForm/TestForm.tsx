@@ -3,7 +3,12 @@ import styled from "@emotion/styled";
 import Timer from "../timer/Timer";
 import DataContext from "../../../context/dataContext";
 import TestElement from "../TestElement/TestElement";
-import { Checkbox, FormControlLabel, Radio, RadioGroup } from "@mui/material";
+import {
+  Checkbox,
+  FormControlLabel,
+  RadioGroup,
+  Typography,
+} from "@mui/material";
 import ResultForm from "./ResultForm/ResultForm";
 import StartForm from "./StartForm/StartForm";
 
@@ -116,10 +121,10 @@ const TestForm: FC = () => {
       {!showStart && !showResult && (
         <>
           <DivBorder>
-            <h1>Тестирование</h1>
+            <Typography variant="h4">Тестирование</Typography>
             <TimerRoot>
               <Timer
-                initialMinutes={0.2}
+                initialMinutes={4}
                 resetTimer={resetTimer}
                 setResetTimer={setResetTimer}
               />
@@ -135,7 +140,7 @@ const TestForm: FC = () => {
             ))}
           </TestElementContainer>
           <DivBorder style={{ flexDirection: "column" }}>
-            <h2>{question.question}</h2>
+            <Typography variant="h6">{question.question}</Typography>
             <RadioGroup value={selectedOption} onChange={handleOptionChange}>
               {question.options.map((item, index) => (
                 <FormControlLabel
@@ -152,7 +157,7 @@ const TestForm: FC = () => {
               ))}
             </RadioGroup>
           </DivBorder>
-          <DivBorder>
+          <DivBorder style={{ alignItems: "center" }}>
             <Button
               onClick={
                 questionIndex + 1 !== quizs.length

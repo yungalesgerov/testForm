@@ -1,6 +1,8 @@
 import React, { useContext } from "react";
 import styled from "@emotion/styled";
 import DataContext from "../../../../context/dataContext";
+import { Typography } from "@mui/material";
+
 const ResultFormRoot = styled("div")({
   width: "80%",
   margin: "0 auto",
@@ -24,9 +26,9 @@ const ResultForm = () => {
   if (!quizs) return null;
   return (
     <ResultFormRoot>
-      <h3>
-        Your score is {marks} out of {quizs.length * 5}
-      </h3>
+      <Typography variant="h4">
+        Your score is {marks} out of {quizs.length * 10}
+      </Typography>
 
       <Button onClick={startOver}>Рестарт</Button>
     </ResultFormRoot>

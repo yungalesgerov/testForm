@@ -13,7 +13,7 @@ interface Question {
   answer: string;
 }
 
-export interface DataContextType {
+interface DataContextType {
   startQuiz: () => void;
   showStart: boolean;
   showQuiz: boolean;
@@ -54,9 +54,11 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const savedState = localStorage.getItem("quizState");
+
     if (savedState) {
       const state = JSON.parse(savedState);
       setQuizs(state.quizs);
+      setQuestion(state.quizs[state.questionIndex]);
       setQuestionIndex(state.questionIndex);
       setCorrectAnswer(state.correctAnswer);
       setSelectedAnswer(state.selectedAnswer);
@@ -67,7 +69,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     } else {
       fetch("quiz.json")
         .then((res) => res.json())
-        .then((data) => setQuizs(data));
+        .then((data) => {
+          setQuizs(data);
+          setQuestion(data[0]);
+        });
     }
   }, []);
 
@@ -112,7 +117,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         : selectedOptions.every((option) => correctAnswers.includes(option));
 
     if (isCorrect) {
-      setMarks((prevMarks) => prevMarks + 5);
+      setMarks((prevMarks) => prevMarks + 10);
     }
 
     setCorrectAnswer(question.answer);
@@ -122,7 +127,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const nextQuestion = () => {
     setCorrectAnswer("");
     setSelectedAnswer("");
-    setQuestionIndex((prevIndex) => prevIndex + 1);
+    setQuestionIndex(questionIndex + 1);
   };
 
   const showTheResult = () => {
@@ -140,6 +145,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     setQuestionIndex(0);
     setMarks(0);
   };
+
+  if (quizs.length === 0) {
+    return null;
+  }
 
   return (
     <DataContext.Provider
