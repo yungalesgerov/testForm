@@ -2,6 +2,12 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Start Project
+
+git clone https://github.com/yungalesgerov/testForm.git (your directory) or ./
+
+npm install (download dependencies)
+
 ## Available Scripts
 
 In the project directory, you can run:
