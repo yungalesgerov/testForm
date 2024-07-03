@@ -18,7 +18,7 @@ interface DataContextType {
   showStart: boolean;
   showQuiz: boolean;
   question: Question;
-  quizs: Question[];
+  questionList: Question[];
   checkAnswer: (
     event: MouseEvent<HTMLButtonElement>,
     selected: string[]
@@ -27,21 +27,21 @@ interface DataContextType {
   selectedAnswer: string;
   questionIndex: number;
   nextQuestion: () => void;
-  showTheResult: () => void;
+  showResultPage: () => void;
   showResult: boolean;
   marks: number;
   startOver: () => void;
   setShowResult: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const DataContext = createContext<Partial<DataContextType>>({});
-
 interface DataProviderProps {
   children: ReactNode;
 }
 
+export const DataContext = createContext<Partial<DataContextType>>({});
+
 export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
-  const [quizs, setQuizs] = useState<Question[]>([]);
+  const [questionList, setQuestionList] = useState<Question[]>([]);
   const [question, setQuestion] = useState<Question>({} as Question);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [correctAnswer, setCorrectAnswer] = useState("");
@@ -53,12 +53,12 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const [showResult, setShowResult] = useState(false);
 
   useEffect(() => {
-    const savedState = localStorage.getItem("quizState");
+    const savedState = localStorage.getItem("questionListState");
 
     if (savedState) {
       const state = JSON.parse(savedState);
-      setQuizs(state.quizs);
-      setQuestion(state.quizs[state.questionIndex]);
+      setQuestionList(state.questionList);
+      setQuestion(state.questionList[state.questionIndex]);
       setQuestionIndex(state.questionIndex);
       setCorrectAnswer(state.correctAnswer);
       setSelectedAnswer(state.selectedAnswer);
@@ -70,17 +70,17 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       fetch("quiz.json")
         .then((res) => res.json())
         .then((data) => {
-          setQuizs(data);
+          setQuestionList(data);
           setQuestion(data[0]);
         });
     }
   }, []);
 
   useEffect(() => {
-    if (quizs.length > 0) {
-      setQuestion(quizs[questionIndex]);
+    if (questionList.length > 0) {
+      setQuestion(questionList[questionIndex]);
       const state = {
-        quizs,
+        questionList,
         questionIndex,
         correctAnswer,
         selectedAnswer,
@@ -89,10 +89,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         showQuiz,
         showResult,
       };
-      localStorage.setItem("quizState", JSON.stringify(state));
+      localStorage.setItem("questionListState", JSON.stringify(state));
     }
   }, [
-    quizs,
+    questionList,
     questionIndex,
     correctAnswer,
     selectedAnswer,
@@ -106,6 +106,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     setShowStart(false);
     setShowQuiz(true);
   };
+
   const checkAnswer = (
     event: MouseEvent<HTMLButtonElement>,
     selectedOptions: string[]
@@ -130,7 +131,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     setQuestionIndex(questionIndex + 1);
   };
 
-  const showTheResult = () => {
+  const showResultPage = () => {
     setShowResult(true);
     setShowStart(false);
     setShowQuiz(false);
@@ -146,7 +147,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     setMarks(0);
   };
 
-  if (quizs.length === 0) {
+  if (questionList.length === 0) {
     return null;
   }
 
@@ -157,13 +158,13 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         showStart,
         showQuiz,
         question,
-        quizs,
+        questionList,
         checkAnswer,
         correctAnswer,
         selectedAnswer,
         questionIndex,
         nextQuestion,
-        showTheResult,
+        showResultPage,
         showResult,
         marks,
         startOver,
@@ -174,5 +175,3 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     </DataContext.Provider>
   );
 };
-
-export default DataContext;

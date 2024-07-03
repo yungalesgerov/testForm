@@ -1,23 +1,23 @@
 import React, { FC, useState, useEffect, useContext } from "react";
-import DataContext from "../../../context/dataContext";
 import { Box, Typography } from "@mui/material";
-
+import { DataContext } from "../../../context";
 interface TimerProps {
   initialMinutes: number;
   resetTimer: boolean;
   setResetTimer: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Timer: FC<TimerProps> = ({
+export const Timer: FC<TimerProps> = ({
   initialMinutes,
   resetTimer,
   setResetTimer,
 }) => {
-  const { showTheResult } = useContext(DataContext);
+  const { showResultPage } = useContext(DataContext);
   const initialTime = initialMinutes * 60;
 
   const [time, setTime] = useState<number>(() => {
     const savedTime = localStorage.getItem("timer");
+
     return savedTime ? parseInt(savedTime) : initialTime;
   });
   const [isActive, setIsActive] = useState<boolean>(true);
@@ -38,6 +38,7 @@ const Timer: FC<TimerProps> = ({
       setTime((prevTime) => {
         const newTime = prevTime - 1;
         localStorage.setItem("timer", newTime.toString());
+
         return newTime;
       });
     }, 1000);
@@ -47,17 +48,18 @@ const Timer: FC<TimerProps> = ({
 
   useEffect(() => {
     if (time === 0 && isActive) {
-      if (showTheResult) {
-        showTheResult();
+      if (showResultPage) {
+        showResultPage();
       }
       setIsActive(false);
       localStorage.removeItem("timer");
     }
-  }, [time, isActive, showTheResult]);
+  }, [time, isActive, showResultPage]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
+
     return `${String(minutes).padStart(2, "0")}:${String(
       remainingSeconds
     ).padStart(2, "0")}`;
@@ -69,5 +71,3 @@ const Timer: FC<TimerProps> = ({
     </Box>
   );
 };
-
-export default Timer;

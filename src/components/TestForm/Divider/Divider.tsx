@@ -1,7 +1,6 @@
-import React from "react";
 import styled from "@emotion/styled";
 
-const TestElementContainer = styled("div")<{
+const DividerRoot = styled("div")<{
   isActive: boolean;
   checked: boolean;
 }>(({ isActive, checked }) => ({
@@ -10,13 +9,11 @@ const TestElementContainer = styled("div")<{
   backgroundColor: isActive ? "#f0230a" : checked ? "#000000" : "#ded6d5",
 }));
 
-interface TestElementProps {
+interface DividerProps {
   isActive: boolean;
   checked: boolean;
 }
 
-const TestElement = ({ isActive, checked }: TestElementProps) => {
-  return <TestElementContainer isActive={isActive} checked={checked} />;
+export const Divider = ({ isActive, checked }: DividerProps) => {
+  return <DividerRoot isActive={isActive} checked={checked} />;
 };
-
-export default TestElement;

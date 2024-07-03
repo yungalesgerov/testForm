@@ -1,9 +1,9 @@
-import React, { useContext, FC } from "react";
-import DataContext from "../../../../context/dataContext";
+import { useContext, FC } from "react";
 import styled from "@emotion/styled";
 import { Typography } from "@mui/material";
+import { DataContext } from "../../../../context";
 
-const StartFormRoot = styled("div")({
+const StartPageRoot = styled("div")({
   width: "80%",
   margin: "0 auto",
   height: "40vh",
@@ -20,14 +20,13 @@ const Button = styled("button")({
   borderRadius: "8px",
   cursor: "pointer",
 });
-const StartForm: FC = () => {
+
+export const StartPage: FC = () => {
   const { startQuiz } = useContext(DataContext);
   return (
-    <StartFormRoot>
+    <StartPageRoot>
       <Typography variant="h4">Начать тестирование</Typography>
       <Button onClick={startQuiz}>Start Quiz</Button>
-    </StartFormRoot>
+    </StartPageRoot>
   );
 };
-
-export default StartForm;

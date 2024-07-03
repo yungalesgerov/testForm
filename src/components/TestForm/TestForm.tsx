@@ -1,18 +1,17 @@
 import React, { FC, useState, useEffect, useContext } from "react";
 import styled from "@emotion/styled";
-import Timer from "../timer/Timer";
-import DataContext from "../../../context/dataContext";
-import TestElement from "../TestElement/TestElement";
 import {
   Checkbox,
   FormControlLabel,
   RadioGroup,
   Typography,
 } from "@mui/material";
-import ResultForm from "./ResultForm/ResultForm";
-import StartForm from "./StartForm/StartForm";
+import { Timer } from "./Timer";
+import { ResultPage, StartPage } from "./TestPages";
+import { Divider } from "./Divider";
+import { DataContext } from "../../context";
 
-const TestFormRoot = styled("div")({
+const TestContentRoot = styled("div")({
   width: "80%",
   margin: "0 auto",
   height: "40vh",
@@ -32,7 +31,7 @@ const TimerRoot = styled("div")({
   border: "1px solid grey",
 });
 
-const DivBorder = styled("div")({
+const FlexDiv = styled("div")({
   width: "100%",
   minHeight: "60px",
   display: "flex",
@@ -57,16 +56,16 @@ const Button = styled("button")(({ disabled }) => ({
   cursor: "pointer",
 }));
 
-const TestForm: FC = () => {
+export const TestForm: FC = () => {
   const {
     showResult,
     showStart,
     question,
-    quizs,
+    questionList,
     checkAnswer,
     questionIndex,
     nextQuestion,
-    showTheResult,
+    showResultPage,
   } = useContext(DataContext);
 
   const [selectedOption, setSelectedOption] = useState<string[]>([]);
@@ -103,24 +102,24 @@ const TestForm: FC = () => {
 
   const handleShowResult = () => {
     handleAnswerAction(() => {
-      if (showTheResult) {
-        showTheResult();
+      if (showResultPage) {
+        showResultPage();
       }
       setResetTimer(true);
     });
   };
 
-  if (!question || !quizs || questionIndex === undefined) {
+  if (!question || !questionList || questionIndex === undefined) {
     return null;
   }
 
   return (
-    <TestFormRoot>
-      {showStart && <StartForm />}
-      {showResult && <ResultForm />}
+    <TestContentRoot>
+      {showStart && <StartPage />}
+      {showResult && <ResultPage />}
       {!showStart && !showResult && (
         <>
-          <DivBorder>
+          <FlexDiv>
             <Typography variant="h4">Тестирование</Typography>
             <TimerRoot>
               <Timer
@@ -129,17 +128,17 @@ const TestForm: FC = () => {
                 setResetTimer={setResetTimer}
               />
             </TimerRoot>
-          </DivBorder>
+          </FlexDiv>
           <TestElementContainer>
-            {quizs.map((item, index) => (
-              <TestElement
+            {questionList.map((item, index) => (
+              <Divider
                 key={index}
                 isActive={questionIndex === index}
                 checked={questionIndex > index}
               />
             ))}
           </TestElementContainer>
-          <DivBorder style={{ flexDirection: "column" }}>
+          <FlexDiv style={{ flexDirection: "column" }}>
             <Typography variant="h6">{question.question}</Typography>
             <RadioGroup value={selectedOption} onChange={handleOptionChange}>
               {question.options.map((item, index) => (
@@ -156,23 +155,23 @@ const TestForm: FC = () => {
                 />
               ))}
             </RadioGroup>
-          </DivBorder>
-          <DivBorder style={{ alignItems: "center" }}>
+          </FlexDiv>
+          <FlexDiv style={{ alignItems: "center" }}>
             <Button
               onClick={
-                questionIndex + 1 !== quizs.length
+                questionIndex + 1 !== questionList.length
                   ? handleNextQuestion
                   : handleShowResult
               }
               disabled={!selectedOption.length}
             >
-              {questionIndex + 1 !== quizs.length ? "Ответить" : "Show Result"}
+              {questionIndex + 1 !== questionList.length
+                ? "Ответить"
+                : "Show Result"}
             </Button>
-          </DivBorder>
+          </FlexDiv>
         </>
       )}
-    </TestFormRoot>
+    </TestContentRoot>
   );
 };
-
-export default TestForm;

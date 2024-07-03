@@ -1,9 +1,9 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import styled from "@emotion/styled";
-import DataContext from "../../../../context/dataContext";
 import { Typography } from "@mui/material";
+import { DataContext } from "../../../../context";
 
-const ResultFormRoot = styled("div")({
+const ResultPageRoot = styled("div")({
   width: "80%",
   margin: "0 auto",
   height: "40vh",
@@ -21,18 +21,17 @@ const Button = styled("button")({
   cursor: "pointer",
 });
 
-const ResultForm = () => {
-  const { marks, startOver, quizs } = useContext(DataContext);
-  if (!quizs) return null;
-  return (
-    <ResultFormRoot>
-      <Typography variant="h4">
-        Your score is {marks} out of {quizs.length * 10}
-      </Typography>
+export const ResultPage = () => {
+  const { marks, startOver, questionList } = useContext(DataContext);
 
+  if (!questionList) return null;
+
+  return (
+    <ResultPageRoot>
+      <Typography variant="h4">
+        Your score is {marks} out of {questionList.length * 10}
+      </Typography>
       <Button onClick={startOver}>Рестарт</Button>
-    </ResultFormRoot>
+    </ResultPageRoot>
   );
 };
-
-export default ResultForm;

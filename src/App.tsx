@@ -1,7 +1,7 @@
 import React, { FC } from "react";
 import "./App.css";
-import TestForm from "./components/testing/TestForm/TestForm";
-import { DataProvider } from "./context/dataContext";
+import { DataProvider } from "./context/DataProvider";
+import { TestForm } from "./components/TestForm";
 
 const App: FC = () => {
   return (
